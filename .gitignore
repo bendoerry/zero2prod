@@ -1,3 +1,7 @@
+## Environment ##
+.devcontainer/.env
+
+
 ## Rust ##
 # Will have compiled files and executables
 debug/
