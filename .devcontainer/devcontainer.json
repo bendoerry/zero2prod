@@ -24,7 +24,9 @@
 				"mutantdino.resourcemonitor",
 				"rust-lang.rust-analyzer",
 				"tamasfe.even-better-toml",
-				"serayuzgur.crates"
+				"serayuzgur.crates",
+				"mads-hartmann.bash-ide-vscode",
+				"ckolkman.vscode-postgres"
 			]
 		}
 	},
