@@ -20,6 +20,7 @@ config = "0.13.2"
 chrono = "0.4.23"
 uuid = { version = "1.2.1", features = ["v4"] }
 env_logger = "0.9.3"
+log = "0.4.17"
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
