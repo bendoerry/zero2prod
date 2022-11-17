@@ -10,11 +10,7 @@ pub struct FormData {
 }
 
 pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    // `Result` has two variants: `Ok` and `Err`.
-    // The first for successes, the second for failures.
-    // We use a `match` statement to choose what to do based
-    // on the outcome.
-    // We will talk more about `Result` going forward!
+    log::info!("Saving new subscriber details in the database");
     match sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, email, name, subscribed_at)
@@ -28,9 +24,12 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> Ht
     .execute(pool.get_ref())
     .await
     {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(_) => {
+            log::info!("New subscriber details have been saved");
+            HttpResponse::Ok().finish()
+        }
         Err(e) => {
-            println!("Failed to execute query: {e}");
+            log::error!("Failed to execute query: {e:?}");
             HttpResponse::InternalServerError().finish()
         }
     }
