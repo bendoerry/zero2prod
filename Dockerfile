@@ -21,15 +21,9 @@ ENV SQLX_OFFLINE true
 RUN cargo build --release
 
 # Runtime stage - Runtime enviroment for our app
-FROM debian:bullseye-slim AS runtime
+FROM gcr.io/distroless/cc AS runtime
 
 WORKDIR /app
-RUN apt update -y \
-    && apt install -y --no-install-recommends openssl ca-certificates \
-    # Clean up
-    && apt autoremove -y \
-    && apt clean -y \
-    && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/target/release/zero2prod zero2prod
 COPY configuration configuration
 ENV APP_ENVIRONMENT production
