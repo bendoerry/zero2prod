@@ -13,3 +13,30 @@ impl AsRef<str> for SubscriberEmail {
         &self.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use claims::assert_err;
+
+    #[test]
+    fn empty_string_is_rejected() {
+        let email = "".to_string();
+
+        assert_err!(SubscriberEmail::parse(email));
+    }
+
+    #[test]
+    fn email_missing_at_symbol_is_rejected() {
+        let email = "ursualdomain.com".to_string();
+
+        assert_err!(SubscriberEmail::parse(email));
+    }
+
+    #[test]
+    fn email_missing_subject_is_rejected() {
+        let email = "@domain.com".to_string();
+
+        assert_err!(SubscriberEmail::parse(email));
+    }
+}
