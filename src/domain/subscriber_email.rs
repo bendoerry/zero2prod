@@ -22,12 +22,12 @@ impl AsRef<str> for SubscriberEmail {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use claims::{assert_err, assert_ok};
-    // We are importing the `SafeEmail` faker!
-    // We also need the `Fake` trait to get access to the
-    // `.fake` method on `SafeEmail`
+    // We have removed the `assert_ok` import.
+    use claims::assert_err;
     use fake::faker::internet::en::SafeEmail;
     use fake::Fake;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
 
     #[test]
     fn empty_string_is_rejected() {
@@ -50,10 +50,22 @@ mod tests {
         assert_err!(SubscriberEmail::parse(email));
     }
 
-    #[test]
-    fn valid_emails_are_parsed_successfully() {
-        let email = SafeEmail().fake();
+    // Both `Clone` and `Debug` are required by `quickcheck`
+    #[derive(Debug, Clone)]
+    struct ValidEmailFixture(pub String);
 
-        assert_ok!(SubscriberEmail::parse(email));
+    impl quickcheck::Arbitrary for ValidEmailFixture {
+        fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+            // `quickcheck` 1.0 has changed trait `Gen` to struct `Gen` with no trait `RngCore`
+            let mut rng = StdRng::seed_from_u64(u64::arbitrary(g));
+            let email = SafeEmail().fake_with_rng(&mut rng);
+
+            Self(email)
+        }
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn valid_emails_are_parsed_successfully(valid_email: ValidEmailFixture) -> bool {
+        SubscriberEmail::parse(valid_email.0).is_ok()
     }
 }
