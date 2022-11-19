@@ -27,6 +27,7 @@ secrecy = { version = "0.8.0", features = ["serde"] }
 tracing-actix-web = "0.6.2"
 serde-aux = "4.1.0"
 unicode-segmentation = "1.10.0"
+validator = "0.16.0"
 
 # Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
