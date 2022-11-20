@@ -9,3 +9,7 @@ database:
 email_client:
   base_url: "http://localhost"
   sender_email: "test@gmail.com"
+  # We are only setting the development value,
+  # we'll deal with the production token outside of version control
+  # (given that it's a sensitive secret!)
+  authorisation_token: "my-secret-token"
