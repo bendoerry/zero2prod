@@ -15,12 +15,15 @@ async fn main() -> std::io::Result<()> {
         .acquire_timeout(std::time::Duration::from_secs(2))
         .connect_lazy_with(configuration.database.with_db());
 
-    // Build an `EmailClient` using `configuration`
+    let base_url = configuration
+        .email_client
+        .url()
+        .expect("Invalid email url.");
     let sender_email = configuration
         .email_client
         .sender()
         .expect("Invalid sender email address.");
-    let email_client = EmailClient::new(configuration.email_client.base_url, sender_email);
+    let email_client = EmailClient::new(base_url, sender_email);
 
     let address = format!(
         "{}:{}",

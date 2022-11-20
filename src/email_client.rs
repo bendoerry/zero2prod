@@ -1,14 +1,14 @@
 use crate::domain::SubscriberEmail;
-use reqwest::Client;
+use reqwest::{Client, Url};
 
 pub struct EmailClient {
     http_client: Client,
-    base_url: String,
+    base_url: Url,
     sender: SubscriberEmail,
 }
 
 impl EmailClient {
-    pub fn new(base_url: String, sender: SubscriberEmail) -> Self {
+    pub fn new(base_url: Url, sender: SubscriberEmail) -> Self {
         Self {
             http_client: Client::new(),
             base_url,
@@ -23,11 +23,9 @@ impl EmailClient {
         html_content: &str,
         text_content: &str,
     ) -> Result<(), String> {
-        // You can do better using `reqwest::Url::join` if you change
-        // `base_url`'s type from `String` to `reqwest::Url`.
-        let url = format!("{}/email", self.base_url);
+        let url = self.base_url.join("/email").map_err(|e| e.to_string())?;
 
-        let builder = self.http_client.post(&url);
+        let builder = self.http_client.post(url);
 
         Ok(())
     }
@@ -47,7 +45,8 @@ mod tests {
         // Arrange
         let mock_server = MockServer::start().await;
         let sender = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
-        let email_client = EmailClient::new(mock_server.uri(), sender);
+        let url = mock_server.uri().as_str().try_into().unwrap();
+        let email_client = EmailClient::new(url, sender);
 
         Mock::given(any())
             .respond_with(ResponseTemplate::new(200))
