@@ -1,10 +1,8 @@
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
-use zero2prod::email_client::EmailClient;
-use zero2prod::startup::run;
+use zero2prod::startup::build;
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
@@ -29,47 +27,35 @@ pub struct TestApp {
     pub db_pool: PgPool,
 }
 
-// Public!
 pub async fn spawn_app() -> TestApp {
     Lazy::force(&TRACING);
 
-    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
-    let port = listener.local_addr().unwrap().port();
-    let address = format!("http://127.0.0.1:{port}");
+    // Randomise configuration to ensure test isolation
+    let configuration = {
+        let mut c = get_configuration().expect("Failed to read configuration.");
+        // Use a different database name for each test case
+        c.database.database_name = Uuid::new_v4().to_string();
+        // Use a random OS port
+        c.application.port = 0;
+        c
+    };
 
-    let mut configuration = get_configuration().expect("Failed to read configuration.");
-    configuration.database.database_name = Uuid::new_v4().to_string();
+    // Create and migrate the database
+    configure_database(&configuration.database).await;
 
-    let connection_pool = configure_database(&configuration.database).await;
-
-    // Build a new email client
-    let base_url = configuration
-        .email_client
-        .url()
-        .expect("Invalid email url.");
-    let sender_email = configuration
-        .email_client
-        .sender()
-        .expect("Invalid sender email address.");
-    let timeout = configuration.email_client.timeout();
-    let email_client = EmailClient::new(
-        base_url,
-        sender_email,
-        configuration.email_client.authorisation_token,
-        timeout,
-    );
-
-    let server =
-        run(listener, connection_pool.clone(), email_client).expect("Failed to bind address");
+    // Launch the application as a background task
+    let server = build(configuration)
+        .await
+        .expect("Failed to build application.");
     let _ = tokio::spawn(server);
 
     TestApp {
-        address,
-        db_pool: connection_pool,
+        // How do we get these?
+        address: todo!(),
+        db_pool: todo!(),
     }
 }
 
-// Not public anymore!
 async fn configure_database(config: &DatabaseSettings) -> PgPool {
     // Create database
     let mut connection = PgConnection::connect_with(&config.without_db())
