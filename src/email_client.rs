@@ -30,8 +30,8 @@ impl EmailClient {
         subject: &str,
         html_content: &str,
         text_content: &str,
-    ) -> Result<(), String> {
-        let url = self.base_url.join("/email").map_err(|e| e.to_string())?;
+    ) -> Result<(), reqwest::Error> {
+        let url = self.base_url.join("/email").unwrap();
 
         let request_body = SendEmailRequest {
             from: self.sender.as_ref().to_owned(),
@@ -41,14 +41,15 @@ impl EmailClient {
             text_body: text_content.to_owned(),
         };
 
-        let builder = self
-            .http_client
+        self.http_client
             .post(url)
             .header(
                 "X-Postmark-Server-Token",
                 self.authorisation_token.expose_secret(),
             )
-            .json(&request_body);
+            .json(&request_body)
+            .send()
+            .await?;
 
         Ok(())
     }
