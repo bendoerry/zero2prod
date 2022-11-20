@@ -2,7 +2,7 @@ use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
-use zero2prod::startup::build;
+use zero2prod::startup::{build, get_connection_pool};
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
@@ -44,15 +44,15 @@ pub async fn spawn_app() -> TestApp {
     configure_database(&configuration.database).await;
 
     // Launch the application as a background task
-    let server = build(configuration)
+    // Notice the `.clone`!
+    let server = build(configuration.clone())
         .await
         .expect("Failed to build application.");
     let _ = tokio::spawn(server);
 
     TestApp {
-        // How do we get these?
         address: todo!(),
-        db_pool: todo!(),
+        db_pool: get_connection_pool(&configuration.database),
     }
 }
 
