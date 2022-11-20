@@ -15,11 +15,9 @@ impl EmailClient {
         base_url: Url,
         sender: SubscriberEmail,
         authorisation_token: Secret<String>,
+        timeout: std::time::Duration,
     ) -> Self {
-        let http_client = Client::builder()
-            .timeout(std::time::Duration::from_secs(10))
-            .build()
-            .unwrap();
+        let http_client = Client::builder().timeout(timeout).build().unwrap();
         Self {
             http_client,
             base_url,
@@ -123,6 +121,8 @@ mod tests {
             base_url.as_str().try_into().unwrap(),
             email(),
             Secret::new(Faker.fake()),
+            // Much lower than 10s!
+            std::time::Duration::from_millis(200),
         )
     }
 
