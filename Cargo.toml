@@ -48,6 +48,7 @@ features = [
 [dev-dependencies]
 claims = "0.7.1"
 fake = "2.5.0"
+linkify = "0.9.0"
 once_cell = "1.16.0"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
