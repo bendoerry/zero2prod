@@ -67,7 +67,8 @@ pub async fn send_confirmation_email(
     new_subscriber: NewSubscriber,
     base_url: &Url,
 ) -> Result<(), reqwest::Error> {
-    let confirmation_link = base_url.join("subscriptions/confirm").unwrap();
+    let mut confirmation_link = base_url.join("subscriptions/confirm").unwrap();
+    confirmation_link.set_query(Some("subscription_token=mytoken"));
 
     let plain_body = format!(
         "Welcome to our newsletter!\n\
