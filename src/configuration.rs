@@ -51,6 +51,13 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
+    pub base_url: String,
+}
+
+impl ApplicationSettings {
+    pub fn url(&self) -> Result<Url, String> {
+        Url::parse(&self.base_url).map_err(|e| e.to_string())
+    }
 }
 
 impl DatabaseSettings {
