@@ -58,8 +58,6 @@ pub async fn subscribe(
 
     let subscription_token = generate_subscription_token();
 
-    // The `?` operator transparently invokes the `Into` trait
-    // on our behalf - we don't need an explicit `map_err` anymore.
     store_token(&mut transaction, subscriber_id, &subscription_token).await?;
 
     if transaction.commit().await.is_err() {
@@ -176,7 +174,6 @@ fn generate_subscription_token() -> String {
         .collect()
 }
 
-// We derive `Debug`, easy and painless
 #[derive(Debug)]
 pub struct StoreTokenError(sqlx::Error);
 
@@ -186,6 +183,13 @@ impl std::fmt::Display for StoreTokenError {
             f,
             "A database error was encountered while trying to store a subscription token."
         )
+    }
+}
+
+impl std::error::Error for StoreTokenError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        // The compiler transparently casts `&sqlx::Error` into a `&dyn Error`
+        Some(&self.0)
     }
 }
 
