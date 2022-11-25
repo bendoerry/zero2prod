@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, ResponseError};
 use chrono::Utc;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -178,3 +178,5 @@ fn generate_subscription_token() -> String {
         .take(25)
         .collect()
 }
+
+impl ResponseError for sqlx::Error {}
