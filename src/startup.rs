@@ -8,7 +8,7 @@ use tracing_actix_web::TracingLogger;
 
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::email_client::EmailClient;
-use crate::routes::{confirm, health_check, subscribe};
+use crate::routes::{confirm, health_check, publish_newsletter, subscribe};
 
 pub struct Application {
     port: u16,
@@ -46,7 +46,6 @@ impl Application {
 
         let server = run(listener, connection_pool, email_client, base_url)?;
 
-        // We "save" the bound port in one of `Application`'s fields
         Ok(Self { port, server })
     }
 
@@ -54,8 +53,6 @@ impl Application {
         self.port
     }
 
-    // A more expressive name that makes it clear that
-    // this function only returns when the application is stopped.
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
         self.server.await
     }
@@ -67,8 +64,6 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
         .connect_lazy_with(configuration.with_db())
 }
 
-// We need to define a wrapper type in order to retrieve the URL
-// in the `subscribe` handler.
 // Retrieval from the context, in actix-web, is type-based: using
 // a raw `Url` would expose us to conflicts.
 pub struct ApplicationBaseUrl(pub Url);
@@ -89,6 +84,7 @@ pub fn run(
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
             .route("/subscriptions/confirm", web::get().to(confirm))
+            .route("/newsletters", web::post().to(publish_newsletter))
             .app_data(db_pool.clone())
             .app_data(email_client.clone())
             .app_data(base_url.clone())
