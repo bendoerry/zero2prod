@@ -174,7 +174,6 @@ fn generate_subscription_token() -> String {
         .collect()
 }
 
-#[derive(Debug)]
 pub struct StoreTokenError(sqlx::Error);
 
 impl std::fmt::Display for StoreTokenError {
@@ -186,9 +185,14 @@ impl std::fmt::Display for StoreTokenError {
     }
 }
 
+impl std::fmt::Debug for StoreTokenError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}\nCaused by:\n\t{}", self, self.0)
+    }
+}
+
 impl std::error::Error for StoreTokenError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        // The compiler transparently casts `&sqlx::Error` into a `&dyn Error`
         Some(&self.0)
     }
 }
