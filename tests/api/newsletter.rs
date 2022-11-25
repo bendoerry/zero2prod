@@ -68,6 +68,62 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
     // Mock verifies on Drop that we have sent the newsletter email
 }
 
+#[tokio::test]
+async fn newsletters_returns_400_for_invalid_data() {
+    // Arrange
+    let app = spawn_app().await;
+    let test_cases = vec![
+        (
+            serde_json::json!({
+                "content": {
+                    "text": "Newsletter body as plain text",
+                    "html": "<p>Newsletter body as HTML</p>",
+                }
+            }),
+            "missing title",
+        ),
+        (
+            serde_json::json!({"title": "Newsletter!"}),
+            "missing content",
+        ),
+        (
+            serde_json::json!({
+                "title": "Newsletter title",
+                "content": {
+                     "html": "<p>Newsletter body as HTML</p>",
+                }
+            }),
+            "missing text",
+        ),
+        (
+            serde_json::json!({
+                "title": "Newsletter title",
+                "content": {
+                    "text": "Newsletter body as plain text",
+                }
+            }),
+            "missing html",
+        ),
+    ];
+
+    for (invalid_body, description) in test_cases {
+        // Act
+        let response = reqwest::Client::new()
+            .post(&format!("{}/newsletters", &app.address))
+            .json(&invalid_body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
+
+        // Assert
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not fail with 400 Bad Request when the payload was {description}."
+        )
+    }
+}
+
 /// Use the public API of the application under test to create
 /// an unconfirmed subscriber
 async fn create_unconfirmed_subscriber(app: &TestApp) -> ConfirmationLinks {
