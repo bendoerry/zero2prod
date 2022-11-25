@@ -40,7 +40,7 @@ pub async fn subscribe(
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
     base_url: web::Data<ApplicationBaseUrl>,
-) -> Result<HttpResponse, actix_web::Error> {
+) -> Result<HttpResponse, SubscribeError> {
     let new_subscriber = match form.0.try_into() {
         Ok(form) => form,
         Err(_) => return Ok(HttpResponse::BadRequest().finish()),
@@ -78,6 +78,19 @@ pub async fn subscribe(
 
     Ok(HttpResponse::Ok().finish())
 }
+
+#[derive(Debug)]
+struct SubscribeError {}
+
+impl std::fmt::Display for SubscribeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Failed to create a new subscriber.")
+    }
+}
+
+impl std::error::Error for SubscribeError {}
+
+impl ResponseError for SubscribeError {}
 
 #[tracing::instrument(
     name = "Store subscription token in the database.",
@@ -196,8 +209,6 @@ impl std::error::Error for StoreTokenError {
         Some(&self.0)
     }
 }
-
-impl ResponseError for StoreTokenError {}
 
 fn error_chain_fmt(
     e: &impl std::error::Error,
