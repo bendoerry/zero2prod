@@ -105,7 +105,6 @@ pub async fn store_token(
     .await
     .map_err(|e| {
         tracing::error!("Failed to execute query: {e:?}");
-        // Wrapping the underlying error
         StoreTokenError(e)
     })?;
 
@@ -180,7 +179,17 @@ fn generate_subscription_token() -> String {
         .collect()
 }
 
-// A new error type, wrapping a sqlx::Error
+// We derive `Debug`, easy and painless
+#[derive(Debug)]
 pub struct StoreTokenError(sqlx::Error);
+
+impl std::fmt::Display for StoreTokenError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "A database error was encountered while trying to store a subscription token."
+        )
+    }
+}
 
 impl ResponseError for StoreTokenError {}
