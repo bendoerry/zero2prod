@@ -77,6 +77,9 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
 // a raw `Url` would expose us to conflicts.
 pub struct ApplicationBaseUrl(pub Url);
 
+#[derive(Clone)]
+pub struct HmacSecret(pub Secret<String>);
+
 pub fn run(
     listener: TcpListener,
     db_pool: PgPool,
@@ -87,7 +90,7 @@ pub fn run(
     let db_pool = web::Data::new(db_pool);
     let email_client = web::Data::new(email_client);
     let base_url = web::Data::new(ApplicationBaseUrl(base_url));
-    let hmac_secret = web::Data::new(hmac_secret);
+    let hmac_secret = web::Data::new(HmacSecret(hmac_secret));
 
     let server = HttpServer::new(move || {
         App::new()
