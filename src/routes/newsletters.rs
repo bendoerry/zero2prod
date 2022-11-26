@@ -3,6 +3,7 @@ use anyhow::Context;
 use reqwest::StatusCode;
 use sqlx::PgPool;
 
+use crate::domain::SubscriberEmail;
 use crate::email_client::EmailClient;
 use crate::routes::error_chain_fmt;
 
@@ -60,15 +61,23 @@ pub struct Content {
 }
 
 struct ConfirmedSubscriber {
-    email: String,
+    email: SubscriberEmail,
 }
 
 #[tracing::instrument(name = "Get confirmed subscribers", skip(pool))]
 async fn get_confirmed_subscribers(
     pool: &PgPool,
 ) -> Result<Vec<ConfirmedSubscriber>, anyhow::Error> {
+    // We only need `Row` to map the data coming out of this query.
+    // Nesting its definition inside the function itself is a simple way
+    // to clearly communicate this coupling (and to ensure it doesn't
+    // get used elsewhere by mistake).
+    struct Row {
+        email: String,
+    }
+
     let rows = sqlx::query_as!(
-        ConfirmedSubscriber,
+        Row,
         r#"
         SELECT email
         FROM subscriptions
@@ -77,5 +86,15 @@ async fn get_confirmed_subscribers(
     )
     .fetch_all(pool)
     .await?;
-    Ok(rows)
+
+    // Map into the domain type
+    let confirmed_subscribers = rows
+        .into_iter()
+        .map(|r| ConfirmedSubscriber {
+            // Just panic if validation fails
+            email: SubscriberEmail::parse(r.email).unwrap(),
+        })
+        .collect();
+
+    Ok(confirmed_subscribers)
 }
