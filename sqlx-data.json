@@ -38,19 +38,7 @@
     },
     "query": "\n        SELECT email\n        FROM subscriptions\n        WHERE status = 'confirmed'\n        "
   },
-  "be6a02c098be084a45cb6414d64965896e534ae2ec8229f1b73fa7d323f2fbe4": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n        UPDATE subscriptions\n        SET status = 'confirmed'\n        WHERE id = $1\n        "
-  },
-  "c2dd30e51b21358710276daba9ed77227fb123adf8c0f83b2d48a479fb50b96a": {
+  "acf1b96c82ddf18db02e71a0e297c822b46f10add52c54649cf599b883165e58": {
     "describe": {
       "columns": [
         {
@@ -62,15 +50,9 @@
           "name": "password_hash",
           "ordinal": 1,
           "type_info": "Text"
-        },
-        {
-          "name": "salt",
-          "ordinal": 2,
-          "type_info": "Text"
         }
       ],
       "nullable": [
-        false,
         false,
         false
       ],
@@ -80,7 +62,19 @@
         ]
       }
     },
-    "query": "\n        SELECT user_id, password_hash, salt\n        FROM users\n        WHERE username = $1\n        "
+    "query": "\n        SELECT user_id, password_hash\n        FROM users\n        WHERE username = $1\n        "
+  },
+  "be6a02c098be084a45cb6414d64965896e534ae2ec8229f1b73fa7d323f2fbe4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        UPDATE subscriptions\n        SET status = 'confirmed'\n        WHERE id = $1\n        "
   },
   "e6822c9e162eabc20338cc27d51a8e80578803ec1589c234d93c3919d14a96a6": {
     "describe": {
