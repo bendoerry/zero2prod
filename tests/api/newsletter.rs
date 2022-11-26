@@ -1,3 +1,4 @@
+use uuid::Uuid;
 use wiremock::matchers::{any, method, path};
 use wiremock::{Mock, ResponseTemplate};
 
@@ -165,6 +166,38 @@ async fn requests_missing_authorisation_are_rejected() {
                     "text": "Newsletter body as plain text",
                     "html": "<p>Newsletter body as HTML</p>",
                 }
+        }))
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    // Assert
+    assert_eq!(401, response.status().as_u16());
+    assert_eq!(
+        r#"Basic realm="publish""#,
+        response.headers()["WWW-Authenticate"]
+    );
+}
+
+#[tokio::test]
+async fn non_existing_user_is_rejected() {
+    // Arrange
+    let app = spawn_app().await;
+
+    // Random credentials
+    let username = Uuid::new_v4().to_string();
+    let password = Uuid::new_v4().to_string();
+
+    // Act
+    let response = reqwest::Client::new()
+        .post(&format!("{}/newsletters", &app.address))
+        .basic_auth(username, Some(password))
+        .json(&serde_json::json!({
+            "title": "Newsletter title",
+            "content": {
+                "text": "Newsletter body as plain text",
+                "html": "<p>Newsletter body as HTML</p>",
+            }
         }))
         .send()
         .await
