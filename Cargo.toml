@@ -18,6 +18,7 @@ argon2 = { version = "0.4.1", features = ["std"] }
 base64 = "0.13.1"
 chrono = { version = "0.4.23", default-features = false, features = ["clock"] }
 config = "0.13.2"
+hmac = { version = "0.12.1", features = ["std"] }
 htmlescape = "0.3.1"
 rand = { version = "0.8.5", features = ["std_rng"] }
 reqwest = { version = "0.11.13", default-features = false, features = [
@@ -27,6 +28,7 @@ reqwest = { version = "0.11.13", default-features = false, features = [
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.147", features = ["derive"] }
 serde-aux = "4.1.2"
+sha2 = "0.10.6"
 thiserror = "1.0.37"
 tokio = { version = "1.22.0", features = ["macros", "rt-multi-thread"] }
 tracing = { version = "0.1.37", features = ["log"] }
