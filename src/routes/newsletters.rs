@@ -1,6 +1,8 @@
-use actix_web::{web, HttpResponse, ResponseError};
+use actix_web::http::header::HeaderMap;
+use actix_web::{web, HttpRequest, HttpResponse, ResponseError};
 use anyhow::Context;
 use reqwest::StatusCode;
+use secrecy::Secret;
 use sqlx::PgPool;
 
 use crate::domain::SubscriberEmail;
@@ -31,7 +33,9 @@ pub async fn publish_newsletter(
     body: web::Json<BodyData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
+    request: HttpRequest,
 ) -> Result<HttpResponse, PublishError> {
+    let _credentials = basic_authentication(request.headers());
     let subscribers = get_confirmed_subscribers(&pool).await?;
     for subscriber in subscribers {
         match subscriber {
@@ -97,4 +101,13 @@ async fn get_confirmed_subscribers(
     .collect();
 
     Ok(confirmed_subscribers)
+}
+
+struct Credentials {
+    username: String,
+    password: Secret<String>,
+}
+
+fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error> {
+    todo!()
 }
