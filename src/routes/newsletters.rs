@@ -1,7 +1,9 @@
 use actix_web::{web, HttpResponse, ResponseError};
+use anyhow::Context;
 use reqwest::StatusCode;
 use sqlx::PgPool;
 
+use crate::email_client::EmailClient;
 use crate::routes::error_chain_fmt;
 
 #[derive(thiserror::Error)]
@@ -10,7 +12,6 @@ pub enum PublishError {
     UnexpectedError(#[from] anyhow::Error),
 }
 
-// Same logic to get the full error chain on `Debug`
 impl std::fmt::Debug for PublishError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         error_chain_fmt(self, f)
@@ -26,10 +27,23 @@ impl ResponseError for PublishError {
 }
 
 pub async fn publish_newsletter(
-    _body: web::Json<BodyData>,
+    body: web::Json<BodyData>,
     pool: web::Data<PgPool>,
+    email_client: web::Data<EmailClient>,
 ) -> Result<HttpResponse, PublishError> {
-    let _subscribers = get_confirmed_subscribers(&pool).await?;
+    let subscribers = get_confirmed_subscribers(&pool).await?;
+    for subscriber in subscribers {
+        email_client
+            .send_email(
+                subscriber.email,
+                &body.title,
+                &body.content.html,
+                &body.content.text,
+            )
+            .await
+            .with_context(|| format!("Failed to send newsletter issue to {}.", subscriber.email))?;
+    }
+
     Ok(HttpResponse::Ok().finish())
 }
 
