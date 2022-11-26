@@ -174,8 +174,8 @@ async fn validate_credentials(
     let mut user_id = None;
     let mut expected_password_hash = Secret::new(
         "$argon2id$v=19$m=15000,t=2,p=1$\
-        gZiV/M1gPc22ElAH/Jh1Hw$\
-        CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno"
+        uzu2AeF6sgttX2rKSXlZPg$\
+        Lr3lHcVIgORUAAP8tEEoD9YnJ0z3xymZj+3AskZjfW0"
             .to_string(),
     );
 
@@ -199,7 +199,6 @@ async fn validate_credentials(
     // So, even if the default password ends up matching (somehow)
     // with the provided password,
     // we never authenticate a non-existing user.
-    // You can easily add a unit test for that precise scenario.
     user_id.ok_or_else(|| PublishError::AuthError(anyhow::anyhow!("Unknown username.")))
 }
 
