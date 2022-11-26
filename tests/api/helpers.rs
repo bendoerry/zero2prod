@@ -60,6 +60,20 @@ impl TestApp {
             .expect("Failed to execute request.")
     }
 
+    pub async fn post_login<Body>(&self, body: &Body) -> reqwest::Response
+    where
+        Body: serde::Serialize,
+    {
+        reqwest::Client::new()
+            .post(&format!("{}/login", &self.address))
+            // This `reqwest` method makes sure that the body is URL-encoded
+            // and the `Content-Type` header is set accordingly.
+            .form(body)
+            .send()
+            .await
+            .expect("Failed to execute request.")
+    }
+
     /// Extract the confirmation links embedded in the request to the email API.
     pub fn get_confirmation_links(&self, email_request: &wiremock::Request) -> ConfirmationLinks {
         let body: serde_json::Value = email_request.body_json().unwrap();
