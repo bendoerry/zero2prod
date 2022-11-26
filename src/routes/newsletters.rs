@@ -68,10 +68,6 @@ struct ConfirmedSubscriber {
 async fn get_confirmed_subscribers(
     pool: &PgPool,
 ) -> Result<Vec<ConfirmedSubscriber>, anyhow::Error> {
-    // We only need `Row` to map the data coming out of this query.
-    // Nesting its definition inside the function itself is a simple way
-    // to clearly communicate this coupling (and to ensure it doesn't
-    // get used elsewhere by mistake).
     struct Row {
         email: String,
     }
@@ -90,9 +86,14 @@ async fn get_confirmed_subscribers(
     // Map into the domain type
     let confirmed_subscribers = rows
         .into_iter()
-        .map(|r| ConfirmedSubscriber {
-            // Just panic if validation fails
-            email: SubscriberEmail::parse(r.email).unwrap(),
+        .filter_map(|r| match SubscriberEmail::parse(r.email) {
+            Ok(email) => Some(ConfirmedSubscriber { email }),
+            Err(error) => {
+                tracing::warn!(
+                    "A confirmed subscriber is using an invalid email address.\n{error}."
+                );
+                None
+            }
         })
         .collect();
 
