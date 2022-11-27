@@ -31,10 +31,10 @@
 		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5432],
+	// "forwardPorts": [5432, 6379],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "rustc --version",
-	"postCreateCommand": "cargo install sqlx-cli --no-default-features --features postgres,rustls",
+	"postCreateCommand": "export SKIP_DOCKER=true && ./scripts/init_db.sh && git config --global --add safe.directory /workspace",
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"features": {
