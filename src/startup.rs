@@ -1,8 +1,9 @@
+use actix_web::cookie::Key;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
-use actix_web_flash_messages::FlashMessagesFramework;
+use actix_web_flash_messages::{storage::CookieMessageStore, FlashMessagesFramework};
 use reqwest::Url;
-use secrecy::Secret;
+use secrecy::{ExposeSecret, Secret};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::TcpListener;
@@ -89,7 +90,9 @@ pub fn run(
     let email_client = web::Data::new(email_client);
     let base_url = web::Data::new(ApplicationBaseUrl(base_url));
 
-    let message_framework = FlashMessagesFramework::builder(todo!()).build();
+    let message_store =
+        CookieMessageStore::builder(Key::from(hmac_secret.expose_secret().as_bytes())).build();
+    let message_framework = FlashMessagesFramework::builder(message_store).build();
 
     let server = HttpServer::new(move || {
         App::new()
