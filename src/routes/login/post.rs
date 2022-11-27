@@ -43,15 +43,19 @@ pub async fn login(
                 AuthError::InvalidCredentials(_) => LoginError::AuthError(e.into()),
                 AuthError::UnexpectedError(_) => LoginError::UnexpectedError(e.into()),
             };
-            FlashMessage::error(e.to_string()).send();
-            let response = HttpResponse::SeeOther()
-                // No cookies here now!
-                .insert_header((LOCATION, "/login"))
-                .finish();
-
-            Err(InternalError::from_response(e, response))
+            Err(login_redirect(e))
         }
     }
+}
+
+/// Redirect to the login page with an error message.
+fn login_redirect(e: LoginError) -> InternalError<LoginError> {
+    FlashMessage::error(e.to_string()).send();
+    let response = HttpResponse::SeeOther()
+        .insert_header((LOCATION, "/login"))
+        .finish();
+
+    InternalError::from_response(e, response)
 }
 
 #[derive(thiserror::Error)]
