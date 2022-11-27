@@ -3,6 +3,7 @@ use actix_web_flash_messages::FlashMessage;
 use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
 
+use crate::authentication::{validate_credentials, AuthError, Credentials};
 use crate::routes::admin::dashboard::get_username;
 use crate::session_state::TypedSession;
 use crate::utils::{e500, see_other};
@@ -34,6 +35,20 @@ pub async fn change_password(
     }
 
     let username = get_username(user_id, &pool).await.map_err(e500)?;
+    let credentials = Credentials {
+        username,
+        password: form.0.current_password,
+    };
+
+    if let Err(e) = validate_credentials(credentials, &pool).await {
+        return match e {
+            AuthError::InvalidCredentials(_) => {
+                FlashMessage::error("The current password is incorrect.").send();
+                Ok(see_other("/admin/password"))
+            }
+            AuthError::UnexpectedError(_) => Err(e500(e)),
+        };
+    }
 
     todo!()
 }
