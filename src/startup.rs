@@ -2,6 +2,7 @@ use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use actix_web_flash_messages::FlashMessagesFramework;
 use reqwest::Url;
+use secrecy::Secret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::TcpListener;
@@ -47,7 +48,13 @@ impl Application {
         let port = listener.local_addr().unwrap().port();
         let base_url = configuration.application.url().expect("Invalid host url.");
 
-        let server = run(listener, connection_pool, email_client, base_url)?;
+        let server = run(
+            listener,
+            connection_pool,
+            email_client,
+            base_url,
+            configuration.application.hmac_secret,
+        )?;
 
         Ok(Self { port, server })
     }
@@ -76,6 +83,7 @@ pub fn run(
     db_pool: PgPool,
     email_client: EmailClient,
     base_url: Url,
+    hmac_secret: Secret<String>,
 ) -> Result<Server, std::io::Error> {
     let db_pool = web::Data::new(db_pool);
     let email_client = web::Data::new(email_client);
