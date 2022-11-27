@@ -2,6 +2,7 @@ use actix_web::{web, HttpResponse};
 use actix_web_flash_messages::FlashMessage;
 use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
+use unicode_segmentation::UnicodeSegmentation;
 
 use crate::authentication::{validate_credentials, AuthError, Credentials};
 use crate::routes::admin::dashboard::get_username;
@@ -31,6 +32,12 @@ pub async fn change_password(
             "You entered two different new passwords - the field values must match.",
         )
         .send();
+        return Ok(see_other("/admin/password"));
+    }
+
+    let new_password_length = form.new_password.expose_secret().graphemes(true).count();
+    if !(13..128).contains(&new_password_length) {
+        FlashMessage::error("Password length must be between 12 and 128 characters.").send();
         return Ok(see_other("/admin/password"));
     }
 
