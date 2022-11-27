@@ -1,5 +1,6 @@
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
+use actix_web_flash_messages::FlashMessagesFramework;
 use reqwest::Url;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -80,8 +81,11 @@ pub fn run(
     let email_client = web::Data::new(email_client);
     let base_url = web::Data::new(ApplicationBaseUrl(base_url));
 
+    let message_framework = FlashMessagesFramework::builder(todo!()).build();
+
     let server = HttpServer::new(move || {
         App::new()
+            .wrap(message_framework.clone())
             .wrap(TracingLogger::default())
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
