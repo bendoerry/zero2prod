@@ -26,7 +26,8 @@
 				"tamasfe.even-better-toml",
 				"serayuzgur.crates",
 				"mads-hartmann.bash-ide-vscode",
-				"ckolkman.vscode-postgres"
+				"ckolkman.vscode-postgres",
+				"skellock.just"
 			]
 		}
 	},
