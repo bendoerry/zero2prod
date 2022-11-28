@@ -1,3 +1,5 @@
+use std::net::TcpListener;
+
 use actix_session::storage::RedisSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
@@ -9,7 +11,6 @@ use reqwest::Url;
 use secrecy::{ExposeSecret, Secret};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
-use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
 use crate::authentication::reject_anonymous_users;

@@ -44,6 +44,7 @@ impl AsRef<str> for SubscriberName {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use claims::{assert_err, assert_ok};
 
     #[test]

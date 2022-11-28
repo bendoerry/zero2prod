@@ -1,7 +1,8 @@
+use std::fmt::Write;
+
 use actix_web::http::header::ContentType;
 use actix_web::HttpResponse;
 use actix_web_flash_messages::IncomingFlashMessages;
-use std::fmt::Write;
 
 pub async fn change_password_form(
     flash_messages: IncomingFlashMessages,
