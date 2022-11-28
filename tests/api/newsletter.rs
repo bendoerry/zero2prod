@@ -2,7 +2,7 @@ use uuid::Uuid;
 use wiremock::matchers::{any, method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-use crate::helpers::{spawn_app, ConfirmationLinks, TestApp};
+use crate::helpers::{assert_is_redirect_to, spawn_app, ConfirmationLinks, TestApp};
 
 #[tokio::test]
 async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
@@ -274,4 +274,16 @@ async fn non_existing_user_with_default_password_is_rejected() {
         r#"Basic realm="publish""#,
         response.headers()["WWW-Authenticate"]
     );
+}
+
+#[tokio::test]
+async fn you_must_be_logged_in_to_access_the_newsletter_form() {
+    // Arrange
+    let app = spawn_app().await;
+
+    // Act
+    let response = app.get_newsletters().await;
+
+    // Assert
+    assert_is_redirect_to(&response, "/login")
 }
