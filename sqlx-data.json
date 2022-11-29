@@ -219,6 +219,19 @@
     },
     "query": "\n        INSERT INTO subscriptions (id, email, name, subscribed_at, status)\n        VALUES ($1, $2, $3, $4, 'pending_confirmation')\n        "
   },
+  "f835e8ebdcd687acf7fcf845127617860abd3d7a806a900aa6d608c993dabb0b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO idempotency (\n            user_id,\n            idempotency_key,\n            created_at\n        )\n        VALUES ($1, $2, now())\n        ON CONFLICT DO NOTHING\n        "
+  },
   "fa625c0844ec26b7f59ce885d6fe0b9a4f4676946706cb926c21da6ab1b89d90": {
     "describe": {
       "columns": [],
