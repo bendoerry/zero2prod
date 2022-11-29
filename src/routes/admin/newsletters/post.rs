@@ -43,7 +43,7 @@ pub async fn publish_newsletter(
         .await
         .map_err(e500)?
     {
-        FlashMessage::info("The newsletter issue has been published!").send();
+        success_message().send();
         return Ok(saved_response);
     }
 
@@ -70,12 +70,16 @@ pub async fn publish_newsletter(
         }
     }
 
-    FlashMessage::info("The newsletter issue has been published!").send();
+    success_message().send();
     let response = see_other("/admin/newsletters");
     let response = save_response(&pool, &idempotency_key, *user_id, response)
         .await
         .map_err(e500)?;
     Ok(response)
+}
+
+fn success_message() -> FlashMessage {
+    FlashMessage::info("The newsletter issue has been published!")
 }
 
 struct ConfirmedSubscriber {
