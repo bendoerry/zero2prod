@@ -117,7 +117,6 @@ async fn run(
             .route("/login", web::get().to(login_form))
             .route("/login", web::post().to(login))
             .route("/health_check", web::get().to(health_check))
-            .route("/newsletters", web::post().to(publish_newsletter))
             .route("/subscriptions", web::post().to(subscribe))
             .route("/subscriptions/confirm", web::get().to(confirm))
             .service(
@@ -127,6 +126,7 @@ async fn run(
                     .route("/password", web::get().to(change_password_form))
                     .route("/password", web::post().to(change_password))
                     .route("/newsletters", web::get().to(publish_newsletter_form))
+                    .route("/newsletters", web::post().to(publish_newsletter))
                     .route("/logout", web::post().to(log_out)),
             )
             .app_data(db_pool.clone())
