@@ -12,17 +12,17 @@ path = "src/main.rs"
 name = "zero2prod"
 
 [dependencies]
+actix-session = { version = "0.7.2", features = ["redis-rs-tls-session"] }
 actix-web = "4.2.1"
+actix-web-flash-messages = { version = "0.4.2", features = ["cookies"] }
+actix-web-lab = "0.18.5"
 anyhow = "1.0.66"
 argon2 = { version = "0.4.1", features = ["std"] }
 base64 = "0.13.1"
 chrono = { version = "0.4.23", default-features = false, features = ["clock"] }
 config = "0.13.2"
+htmlescape = "0.3.1"
 rand = { version = "0.8.5", features = ["std_rng"] }
-reqwest = { version = "0.11.13", default-features = false, features = [
-    "json",
-    "rustls-tls",
-] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.147", features = ["derive"] }
 serde-aux = "4.1.2"
@@ -37,10 +37,19 @@ tracing-subscriber = { version = "0.3.16", features = [
     "env-filter",
 ] }
 unicode-segmentation = "1.10.0"
-uuid = { version = "1.2.2", features = ["v4"] }
+urlencoding = "2.1.2"
+uuid = { version = "1.2.2", features = ["v4", "serde"] }
 validator = "0.16.0"
 
-# Using table-like toml syntax to avoid a super-long line!
+[dependencies.reqwest]
+version = "0.11.13"
+default-features = false
+features = [
+    "json",
+    "rustls-tls",
+    "cookies"
+]
+
 [dependencies.sqlx]
 version = "0.6.2"
 default-features = false

@@ -51,7 +51,7 @@ pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
 /// Runs the provided closure on a thread where blocking is acceptable,
 /// but includes the current tracing span.
 ///
-/// Uses `tokio::task::spawn_blocking` under the hood
+/// Uses [`spawn_blocking`](tokio::task::spawn_blocking) under the hood.
 pub fn spawn_blocking_with_tracing<F, R>(f: F) -> JoinHandle<R>
 where
     F: FnOnce() -> R + Send + 'static,

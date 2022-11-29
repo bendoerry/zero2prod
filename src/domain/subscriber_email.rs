@@ -30,7 +30,7 @@ impl std::fmt::Display for SubscriberEmail {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // We have removed the `assert_ok` import.
+
     use claims::assert_err;
     use fake::faker::internet::en::SafeEmail;
     use fake::Fake;
