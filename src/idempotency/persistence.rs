@@ -1,6 +1,7 @@
 use actix_web::body::to_bytes;
 use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
+use sqlx::postgres::PgHasArrayType;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -11,6 +12,12 @@ use super::IdempotencyKey;
 struct HeaderPairRecord {
     name: String,
     value: Vec<u8>,
+}
+
+impl PgHasArrayType for HeaderPairRecord {
+    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
+        sqlx::postgres::PgTypeInfo::with_name("_header_pair")
+    }
 }
 
 pub async fn get_saved_response(
@@ -52,7 +59,6 @@ pub async fn save_response(
     pool: &PgPool,
     idempotency_key: &IdempotencyKey,
     user_id: Uuid,
-    // No longer a reference!
     http_response: HttpResponse,
 ) -> Result<HttpResponse, anyhow::Error> {
     let (response_head, body) = http_response.into_parts();
@@ -72,7 +78,7 @@ pub async fn save_response(
         h
     };
 
-    sqlx::query!(
+    sqlx::query_unchecked!(
         r#"
         INSERT INTO idempotency (
             user_id,
@@ -89,7 +95,9 @@ pub async fn save_response(
         status_code,
         headers,
         body.as_ref()
-    ).execute(pool).await?;
+    )
+    .execute(pool)
+    .await?;
 
     // We need `.map_into_boxed_body` to go from
     // `HttpResponse<Bytes>` to `HttpResponse<BoxBody`

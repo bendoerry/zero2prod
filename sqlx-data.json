@@ -109,6 +109,45 @@
     },
     "query": "\n        SELECT subscriber_id FROM subscription_tokens\n        WHERE subscription_token = $1\n        "
   },
+  "429f0897a3c43dca32af247947c1ddd6d6ddb3240e39400ebd68f60cc6f07bbd": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Int2",
+          {
+            "Custom": {
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "kind": {
+                      "Composite": [
+                        [
+                          "name",
+                          "Text"
+                        ],
+                        [
+                          "value",
+                          "Bytea"
+                        ]
+                      ]
+                    },
+                    "name": "header_pair"
+                  }
+                }
+              },
+              "name": "_header_pair"
+            }
+          },
+          "Bytea"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO idempotency (\n            user_id,\n            idempotency_key,\n            response_status_code,\n            response_headers,\n            response_body,\n            created_at\n        )\n        VALUES ($1, $2, $3, $4, $5, now())\n        "
+  },
   "7b57e2776a245ba1602f638121550485e2219a6ccaaa62b5ec3e4683e33a3b5f": {
     "describe": {
       "columns": [
