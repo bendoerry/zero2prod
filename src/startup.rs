@@ -30,21 +30,8 @@ impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, anyhow::Error> {
         let connection_pool = get_connection_pool(&configuration.database);
 
-        let base_url = configuration
-            .email_client
-            .url()
-            .expect("Invalid email url.");
-        let sender_email = configuration
-            .email_client
-            .sender()
-            .expect("Invalid sender email address.");
-        let timeout = configuration.email_client.timeout();
-        let email_client = EmailClient::new(
-            base_url,
-            sender_email,
-            configuration.email_client.authorisation_token,
-            timeout,
-        );
+        // Use helper function!
+        let email_client = configuration.email_client.client();
 
         let address = format!(
             "{}:{}",
