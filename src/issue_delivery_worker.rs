@@ -12,21 +12,8 @@ use crate::startup::get_connection_pool;
 pub async fn run_worker_until_stopped(configuration: Settings) -> Result<(), anyhow::Error> {
     let connection_pool = get_connection_pool(&configuration.database);
 
-    let sender_email = configuration
-        .email_client
-        .sender()
-        .expect("Invalid sender email address.");
-    let timeout = configuration.email_client.timeout();
-    let base_url = configuration
-        .email_client
-        .url()
-        .expect("Invalid email url.");
-    let email_client = EmailClient::new(
-        base_url,
-        sender_email,
-        configuration.email_client.authorisation_token,
-        timeout,
-    );
+    // Use helper function!
+    let email_client = configuration.email_client.client();
 
     worker_loop(connection_pool, email_client).await
 }
